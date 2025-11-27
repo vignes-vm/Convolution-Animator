@@ -65,7 +65,7 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>Linear Convolution Animator</h1>
+        <h1>Linear Convolution</h1>
         <p>Interactive visualization of the convolution formula: y[n] = Σ x[k]·h[n-k]</p>
       </header>
 
