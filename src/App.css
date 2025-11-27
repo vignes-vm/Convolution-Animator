@@ -4,14 +4,14 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f5f5;
+  background-color: #e2eef5;
   min-height: 100vh;
 }
 
 .app-header {
   text-align: center;
   margin-bottom: 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0523ac 0%, #834bba 100%);
   padding: 30px;
   border-radius: 8px;
   color: white;

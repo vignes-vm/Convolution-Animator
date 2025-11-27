@@ -13,7 +13,7 @@ import './AnimationPanel.css';
 export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [speed, setSpeed] = useState(1000); // milliseconds per step
+  const [speed, setSpeed] = useState(2500); // milliseconds per step
 
   // Set up auto-play with interval
   useEffect(() => {
