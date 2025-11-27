@@ -10,7 +10,7 @@ import './AnimationPanel.css';
  * - Sum for the current step
  * - Controls for play/pause and step navigation
  */
-export default function AnimationPanel({ x, h, steps, onStepChange }) {
+export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [speed, setSpeed] = useState(1000); // milliseconds per step
@@ -36,6 +36,14 @@ export default function AnimationPanel({ x, h, steps, onStepChange }) {
 
   const step = steps[currentStep];
   const n = step.n;
+
+  // Build quick lookup maps for this step: map xIndex -> pair, hIndex -> pair
+  const xMap = new Map();
+  const hMap = new Map();
+  step.pairs.forEach((p) => {
+    if (p.xIndex != null) xMap.set(p.xIndex, p);
+    if (p.hIndex != null) hMap.set(p.hIndex, p);
+  });
 
   /**
    * Determine which elements in h[] are overlapping with x[]
@@ -72,6 +80,13 @@ export default function AnimationPanel({ x, h, steps, onStepChange }) {
     setIsPlaying(false);
   };
 
+  const handleSliderChange = (e) => {
+    const v = Number(e.target.value);
+    setCurrentStep(v);
+    if (onStepChange) onStepChange(v);
+    setIsPlaying(false);
+  };
+
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
   };
@@ -98,28 +113,35 @@ export default function AnimationPanel({ x, h, steps, onStepChange }) {
             {x.map((val, idx) => (
               <div
                 key={`x-${idx}`}
-                className={`element ${xIndices.has(idx) ? 'overlap' : ''}`}
+                className={`element ${xIndices.has(idx) ? 'overlap' : ''} ${xMap.has(idx) ? 'pair' : ''}`}
                 title={`x[${idx}] = ${val}`}
               >
                 <span className="index">[{idx}]</span>
                 <span className="value">{val}</span>
+                {/* product bubble inside x element if this x participates in a pair */}
+                {xMap.has(idx) && (
+                  <div className="product-bubble">{xMap.get(idx).product}</div>
+                )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* h[n] sequence */}
+        {/* h[n] sequence - display flipped h (hFlipped provided by convolve) */}
         <div className="sequence-row">
-          <label className="sequence-label">h[n]:</label>
+          <label className="sequence-label">h (flipped):</label>
           <div className="sequence">
-            {h.map((val, idx) => (
+            {(hFlipped || h).map((val, idx) => (
               <div
                 key={`h-${idx}`}
-                className={`element ${hIndices.has(idx) ? 'overlap' : ''}`}
-                title={`h[${idx}] = ${val}`}
+                className={`element ${hIndices.has(idx) ? 'overlap' : ''} ${hMap.has(idx) ? 'pair' : ''}`}
+                title={`hFlipped[${idx}] = ${val}`}
               >
                 <span className="index">[{idx}]</span>
                 <span className="value">{val}</span>
+                {hMap.has(idx) && (
+                  <div className="product-bubble bottom">{hMap.get(idx).product}</div>
+                )}
               </div>
             ))}
           </div>
@@ -133,7 +155,7 @@ export default function AnimationPanel({ x, h, steps, onStepChange }) {
           {step.pairs.length > 0 ? (
             step.pairs.map((pair, idx) => (
               <div key={idx} className="product-item">
-                x[{pair.xIndex}]×h[{pair.hIndex}] = {pair.xVal}×{pair.hVal} = {pair.product}
+                x[{pair.xIndex}] × h[{pair.hIndex}] = {pair.xVal} × {pair.hVal} = {pair.product}
               </div>
             ))
           ) : (
@@ -141,9 +163,23 @@ export default function AnimationPanel({ x, h, steps, onStepChange }) {
           )}
         </div>
 
-        {/* Sum */}
+        {/* Sum and expression */}
         <div className="step-sum">
-          <strong>y[{n}] = {step.sum}</strong>
+          <div className="expr">
+            {step.pairs.length > 0 ? (
+              <>
+                {step.pairs.map((p, i) => (
+                  <span key={i} className="expr-part">
+                    {p.xVal}×{p.hVal}{i < step.pairs.length - 1 ? ' + ' : ''}
+                  </span>
+                ))}
+                <span className="expr-eq"> = {step.sum}</span>
+              </>
+            ) : (
+              <span>y[{n}] = 0</span>
+            )}
+          </div>
+          <div className="sum-large">y[{n}] = <strong>{step.sum}</strong></div>
         </div>
       </div>
 
@@ -169,6 +205,18 @@ export default function AnimationPanel({ x, h, steps, onStepChange }) {
             <option value={2000}>Slow (2s)</option>
           </select>
         </div>
+      </div>
+
+      {/* Slider to jump to any step */}
+      <div className="slider-row">
+        <input
+          type="range"
+          min={0}
+          max={steps.length - 1}
+          value={currentStep}
+          onChange={handleSliderChange}
+        />
+        <div className="slider-label">Step {currentStep + 1} / {steps.length}</div>
       </div>
     </div>
   );

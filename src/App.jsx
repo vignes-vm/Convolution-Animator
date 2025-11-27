@@ -20,23 +20,20 @@ import { convolve } from './ConvolutionEngine';
  * - currentStep: current animation frame index (synced with AnimationPanel)
  */
 function App() {
-  const [x, setX] = useState([1, 2, 3]);
-  const [h, setH] = useState([5, 6, 7]);
+  // Start with empty sequences and focus on input
+  const [x, setX] = useState([]);
+  const [h, setH] = useState([]);
   const [steps, setSteps] = useState([]);
   const [y, setY] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [hasStarted, setHasStarted] = useState(false);
+  const [hFlipped, setHFlipped] = useState([]);
+  const [zeroPad, setZeroPad] = useState(false);
 
   /**
    * Initialize with default example on component mount
    */
-  useEffect(() => {
-    const { y: output, steps: computedSteps } = convolve(x, h);
-    setY(output);
-    setSteps(computedSteps);
-    setCurrentStep(0);
-    setHasStarted(true);
-  }, []);
+  // No automatic computation on mount — user must enter sequences and click Start
 
   /**
    * Handle Start Animation button click from InputPanel
@@ -47,11 +44,22 @@ function App() {
     setH(newH);
 
     // Compute convolution
-    const { y: output, steps: computedSteps } = convolve(newX, newH);
+    const { y: output, steps: computedSteps, hFlipped: hf } = convolve(newX, newH, { zeroPad });
     setY(output);
     setSteps(computedSteps);
+    setHFlipped(hf || []);
     setCurrentStep(0);
     setHasStarted(true);
+  };
+
+  const handleZeroPadToggle = (val) => {
+    setZeroPad(val);
+    // Recompute using existing x,h
+    const { y: output, steps: computedSteps, hFlipped: hf } = convolve(x, h, { zeroPad: val });
+    setY(output);
+    setSteps(computedSteps);
+    setHFlipped(hf || []);
+    setCurrentStep(0);
   };
 
   return (
@@ -64,6 +72,17 @@ function App() {
       <div className="app-layout">
         <aside className="input-section">
           <InputPanel onStart={handleStart} />
+          <div style={{ padding: '12px' }}>
+            <label style={{ fontWeight: 600 }}>
+              <input
+                type="checkbox"
+                checked={zeroPad}
+                onChange={(e) => handleZeroPadToggle(e.target.checked)}
+                style={{ marginRight: '8px' }}
+              />
+              Show zero-padding
+            </label>
+          </div>
         </aside>
 
         <main className="animation-section">
@@ -71,7 +90,8 @@ function App() {
             <>
               <AnimationPanel 
                 x={x} 
-                h={h} 
+                h={h}
+                hFlipped={hFlipped}
                 steps={steps}
                 onStepChange={setCurrentStep}
               />

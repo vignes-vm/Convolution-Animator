@@ -8,9 +8,15 @@ import './InputPanel.css';
  * Accepts comma-separated numbers and validates them.
  */
 export default function InputPanel({ onStart }) {
-  const [xInput, setXInput] = useState('1,2,3');
-  const [hInput, setHInput] = useState('5,6,7');
+  // Start with empty inputs so user focuses on entering sequences
+  const [xInput, setXInput] = useState('');
+  const [hInput, setHInput] = useState('');
   const [error, setError] = useState('');
+  const [parsedX, setParsedX] = useState([]);
+  const [parsedH, setParsedH] = useState([]);
+
+  // Allow only digits, decimals, negatives, commas, spaces
+  const validChars = /^[0-9+\-.,\s]*$/;
 
   /**
    * Parses comma-separated input string into array of numbers
@@ -19,6 +25,9 @@ export default function InputPanel({ onStart }) {
     if (!str || str.trim() === '') return null;
     
     try {
+      // Quick character validation to prevent letters
+      if (!validChars.test(str)) return null;
+
       const arr = str
         .split(',')
         .map(s => s.trim())
@@ -52,7 +61,30 @@ export default function InputPanel({ onStart }) {
       return;
     }
 
+    setParsedX(x);
+    setParsedH(h);
     onStart(x, h);
+  };
+
+  // Live preview of parsed arrays whenever input changes
+  const handleXChange = (v) => {
+    setXInput(v);
+    const p = parseInput(v);
+    if (p) setParsedX(p);
+  };
+
+  const handleHChange = (v) => {
+    setHInput(v);
+    const p = parseInput(v);
+    if (p) setParsedH(p);
+  };
+
+  const applyPreset = (presetX, presetH) => {
+    setXInput(presetX.join(','));
+    setHInput(presetH.join(','));
+    setParsedX(presetX);
+    setParsedH(presetH);
+    // apply preset but do not auto-start; user can review and click Start
   };
 
   return (
@@ -65,7 +97,7 @@ export default function InputPanel({ onStart }) {
           id="x-input"
           type="text"
           value={xInput}
-          onChange={(e) => setXInput(e.target.value)}
+          onChange={(e) => handleXChange(e.target.value)}
           placeholder="e.g., 1,2,3"
         />
       </div>
@@ -76,8 +108,8 @@ export default function InputPanel({ onStart }) {
           id="h-input"
           type="text"
           value={hInput}
-          onChange={(e) => setHInput(e.target.value)}
-          placeholder="e.g., 5,6,7"
+          onChange={(e) => handleHChange(e.target.value)}
+          placeholder="e.g., 1,2,3"
         />
       </div>
 
@@ -86,6 +118,11 @@ export default function InputPanel({ onStart }) {
       <button className="start-button" onClick={handleStart}>
         Start Animation
       </button>
+
+      <div className="live-preview">
+        <div><strong>Parsed x:</strong> [{parsedX.join(', ')}]</div>
+        <div><strong>Parsed h:</strong> [{parsedH.join(', ')}]</div>
+      </div>
     </div>
   );
 }

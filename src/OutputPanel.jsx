@@ -11,6 +11,8 @@ export default function OutputPanel({ y, currentStep }) {
   if (!y || y.length === 0) {
     return <div className="output-panel">No output to display</div>;
   }
+  // Determine maximum for bar scaling
+  const maxVal = Math.max(...y.map(v => Math.abs(v)), 1);
 
   return (
     <div className="output-panel">
@@ -25,6 +27,13 @@ export default function OutputPanel({ y, currentStep }) {
           >
             <span className="output-index">[{idx}]</span>
             <span className="output-value">{val}</span>
+            {/* animated bar showing relative magnitude */}
+            <div className="output-bar-wrap">
+              <div
+                className="output-bar"
+                style={{ width: `${Math.abs(val) / maxVal * 100}%` }}
+              />
+            </div>
           </div>
         ))}
       </div>
