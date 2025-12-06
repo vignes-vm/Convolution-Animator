@@ -3,7 +3,9 @@ import './App.css';
 import InputPanel from './InputPanel';
 import AnimationPanel from './AnimationPanel';
 import OutputPanel from './OutputPanel';
-import { convolve } from './ConvolutionEngine';
+import GraphPanel from './GraphPanel';
+import SpeedControl from './SpeedControl';
+import { convolve, convolveCircular } from './ConvolutionEngine';
 
 /**
  * App.jsx
@@ -29,6 +31,8 @@ function App() {
   const [hasStarted, setHasStarted] = useState(false);
   const [hFlipped, setHFlipped] = useState([]);
   const [zeroPad, setZeroPad] = useState(false);
+  const [convolutionType, setConvolutionType] = useState('linear');
+  const [animationSpeed, setAnimationSpeed] = useState(1500);
 
   /**
    * Initialize with default example on component mount
@@ -39,12 +43,14 @@ function App() {
    * Handle Start Animation button click from InputPanel
    * Recompute convolution with new sequences
    */
-  const handleStart = (newX, newH) => {
+  const handleStart = (newX, newH, newConvolutionType = 'linear') => {
     setX(newX);
     setH(newH);
+    setConvolutionType(newConvolutionType);
 
-    // Compute convolution
-    const { y: output, steps: computedSteps, hFlipped: hf } = convolve(newX, newH, { zeroPad });
+    // Compute convolution based on type
+    const convolutionFunction = newConvolutionType === 'circular' ? convolveCircular : convolve;
+    const { y: output, steps: computedSteps, hFlipped: hf } = convolutionFunction(newX, newH, { zeroPad });
     setY(output);
     setSteps(computedSteps);
     setHFlipped(hf || []);
@@ -52,10 +58,24 @@ function App() {
     setHasStarted(true);
   };
 
+  const handleConvolutionTypeChange = (newType) => {
+    setConvolutionType(newType);
+    // If we have sequences loaded, recompute with new type
+    if (x.length > 0 && h.length > 0) {
+      const convolutionFunction = newType === 'circular' ? convolveCircular : convolve;
+      const { y: output, steps: computedSteps, hFlipped: hf } = convolutionFunction(x, h, { zeroPad });
+      setY(output);
+      setSteps(computedSteps);
+      setHFlipped(hf || []);
+      setCurrentStep(0);
+    }
+  };
+
   const handleZeroPadToggle = (val) => {
     setZeroPad(val);
-    // Recompute using existing x,h
-    const { y: output, steps: computedSteps, hFlipped: hf } = convolve(x, h, { zeroPad: val });
+    // Recompute using existing x,h and current convolution type
+    const convolutionFunction = convolutionType === 'circular' ? convolveCircular : convolve;
+    const { y: output, steps: computedSteps, hFlipped: hf } = convolutionFunction(x, h, { zeroPad: val });
     setY(output);
     setSteps(computedSteps);
     setHFlipped(hf || []);
@@ -65,13 +85,15 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>Linear Convolution</h1>
-        <p>Interactive visualization of the convolution formula: y[n] = Σ x[k]·h[n-k]</p>
+        <h1>{convolutionType === 'circular' ? 'Circular' : 'Linear'} Convolution Animator</h1>
       </header>
 
       <div className="app-layout">
         <aside className="input-section">
-          <InputPanel onStart={handleStart} />
+          <InputPanel 
+            onStart={handleStart} 
+            onConvolutionTypeChange={handleConvolutionTypeChange}
+          />
           <div style={{ padding: '12px' }}>
             <label style={{ fontWeight: 600 }}>
               <input
@@ -88,13 +110,23 @@ function App() {
         <main className="animation-section">
           {hasStarted && steps.length > 0 ? (
             <>
-              <AnimationPanel 
-                x={x} 
-                h={h}
-                hFlipped={hFlipped}
-                steps={steps}
-                onStepChange={setCurrentStep}
-              />
+              <div className="animation-content">
+                <AnimationPanel 
+                  x={x} 
+                  h={h}
+                  hFlipped={hFlipped}
+                  steps={steps}
+                  speed={animationSpeed}
+                  onStepChange={setCurrentStep}
+                />
+                <GraphPanel 
+                  x={x}
+                  h={h}
+                  y={y}
+                  currentStep={currentStep}
+                  convolutionType={convolutionType}
+                />
+              </div>
               <OutputPanel y={y} currentStep={currentStep} />
             </>
           ) : (
@@ -103,12 +135,18 @@ function App() {
             </div>
           )}
         </main>
+        
+        {hasStarted && (
+          <SpeedControl 
+            speed={animationSpeed}
+            onSpeedChange={setAnimationSpeed}
+          />
+        )}
       </div>
 
       <footer className="app-footer">
         <p>
-          This tool visualizes linear convolution by showing how each element of x[n]
-          multiplies with shifted elements of h[n] to compute y[n].
+          © 2025 Convolution Animator. Developed by Vignes VM
         </p>
       </footer>
     </div>

@@ -1,0 +1,176 @@
+/* SpeedControl.css */
+
+.speed-control {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 180px;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);
+  border: 2px solid #ffc107;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+  z-index: 1000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.speed-control-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.speed-control-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+}
+
+.speed-label {
+  background: #ffc107;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.speed-slider-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0;
+  min-height: 200px;
+}
+
+.speed-scale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 200px;
+  font-size: 10px;
+  color: #666;
+  text-align: right;
+  padding-right: 8px;
+}
+
+.speed-mark {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.speed-slider {
+  writing-mode: bt-lr; /* IE */
+  -webkit-appearance: slider-vertical; /* WebKit */
+  width: 8px;
+  height: 200px;
+  background: linear-gradient(to top, #28a745, #ffc107, #dc3545);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #333;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.speed-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #333;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.speed-values {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 200px;
+  font-size: 10px;
+  color: #666;
+  text-align: left;
+  padding-left: 8px;
+}
+
+.speed-info {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 11px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.speed-info p {
+  margin: 4px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .speed-control {
+    right: 10px;
+    width: 160px;
+    padding: 15px;
+  }
+  
+  .speed-slider-container {
+    min-height: 150px;
+  }
+  
+  .speed-slider,
+  .speed-scale,
+  .speed-values {
+    height: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .speed-control {
+    position: relative;
+    right: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    margin: 20px 0;
+  }
+  
+  .speed-slider-container {
+    flex-direction: row;
+    min-height: auto;
+    gap: 20px;
+  }
+  
+  .speed-slider {
+    writing-mode: initial;
+    -webkit-appearance: none;
+    width: 200px;
+    height: 8px;
+  }
+  
+  .speed-scale,
+  .speed-values {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 200px;
+    height: auto;
+    padding: 0;
+  }
+  
+  .speed-mark {
+    writing-mode: initial;
+    text-orientation: initial;
+  }
+}

@@ -37,6 +37,13 @@
   margin-bottom: 30px;
 }
 
+.animation-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
 .input-section {
   background-color: white;
   padding: 0;
@@ -88,6 +95,10 @@
 
   .input-section {
     position: static;
+  }
+  
+  .animation-content {
+    grid-template-columns: 1fr;
   }
 }
 

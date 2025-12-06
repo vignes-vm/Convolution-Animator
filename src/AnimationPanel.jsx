@@ -1,21 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './AnimationPanel.css';
 
-/**
- * AnimationPanel.jsx
- * 
- * Displays the step-by-step convolution animation showing:
- * - Input sequences x[n] and h[n] with highlighted overlapping elements
- * - Current step index and products being computed
- * - Sum for the current step
- * - Controls for play/pause and step navigation
- */
-export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange }) {
+export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange, speed }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [speed, setSpeed] = useState(2500); // milliseconds per step
 
-  // Set up auto-play with interval
   useEffect(() => {
     if (!isPlaying || steps.length === 0) return;
 
@@ -37,7 +26,6 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange }) 
   const step = steps[currentStep];
   const n = step.n;
 
-  // Build quick lookup maps for this step: map xIndex -> pair, hIndex -> pair
   const xMap = new Map();
   const hMap = new Map();
   step.pairs.forEach((p) => {
@@ -45,12 +33,6 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange }) 
     if (p.hIndex != null) hMap.set(p.hIndex, p);
   });
 
-  /**
-   * Determine which elements in h[] are overlapping with x[]
-   * For step n: x[k] overlaps with h[n-k]
-   * So h[j] overlaps if j = n - k for some k in [0, N-1]
-   * Which means j = n - k, so k = n - j, and k must be in [0, N-1]
-   */
   const getOverlapIndices = () => {
     const xIndices = new Set();
     const hIndices = new Set();
@@ -89,10 +71,6 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange }) 
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
-  };
-
-  const handleSpeedChange = (e) => {
-    setSpeed(parseInt(e.target.value));
   };
 
   return (
@@ -196,15 +174,6 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange }) 
         <button className="control-button" onClick={handleNext}>
           Next ⏭
         </button>
-
-        <div className="speed-control">
-          <label htmlFor="speed">Speed:</label>
-          <select id="speed" value={speed} onChange={handleSpeedChange}>
-            <option value={500}>Fast (0.5s)</option>
-            <option value={1000}>Normal (1s)</option>
-            <option value={2000}>Slow (2s)</option>
-          </select>
-        </div>
       </div>
 
       {/* Slider to jump to any step */}
