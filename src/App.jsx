@@ -7,22 +7,7 @@ import GraphPanel from './GraphPanel';
 import SpeedControl from './SpeedControl';
 import { convolve, convolveCircular } from './ConvolutionEngine';
 
-/**
- * App.jsx
- * 
- * Main application component that integrates:
- * - InputPanel: User input for sequences x[n] and h[n]
- * - AnimationPanel: Step-by-step convolution visualization
- * - OutputPanel: Display the computed output y[n]
- * 
- * State management:
- * - x, h: input sequences
- * - steps: step data for animation
- * - y: output sequence
- * - currentStep: current animation frame index (synced with AnimationPanel)
- */
 function App() {
-  // Start with empty sequences and focus on input
   const [x, setX] = useState([]);
   const [h, setH] = useState([]);
   const [steps, setSteps] = useState([]);
@@ -34,21 +19,11 @@ function App() {
   const [convolutionType, setConvolutionType] = useState('linear');
   const [animationSpeed, setAnimationSpeed] = useState(1500);
 
-  /**
-   * Initialize with default example on component mount
-   */
-  // No automatic computation on mount — user must enter sequences and click Start
-
-  /**
-   * Handle Start Animation button click from InputPanel
-   * Recompute convolution with new sequences
-   */
   const handleStart = (newX, newH, newConvolutionType = 'linear') => {
     setX(newX);
     setH(newH);
     setConvolutionType(newConvolutionType);
 
-    // Compute convolution based on type
     const convolutionFunction = newConvolutionType === 'circular' ? convolveCircular : convolve;
     const { y: output, steps: computedSteps, hFlipped: hf } = convolutionFunction(newX, newH, { zeroPad });
     setY(output);
@@ -60,7 +35,8 @@ function App() {
 
   const handleConvolutionTypeChange = (newType) => {
     setConvolutionType(newType);
-    // If we have sequences loaded, recompute with new type
+    setCurrentStep(0);
+    
     if (x.length > 0 && h.length > 0) {
       const convolutionFunction = newType === 'circular' ? convolveCircular : convolve;
       const { y: output, steps: computedSteps, hFlipped: hf } = convolutionFunction(x, h, { zeroPad });
@@ -73,13 +49,16 @@ function App() {
 
   const handleZeroPadToggle = (val) => {
     setZeroPad(val);
-    // Recompute using existing x,h and current convolution type
-    const convolutionFunction = convolutionType === 'circular' ? convolveCircular : convolve;
-    const { y: output, steps: computedSteps, hFlipped: hf } = convolutionFunction(x, h, { zeroPad: val });
-    setY(output);
-    setSteps(computedSteps);
-    setHFlipped(hf || []);
     setCurrentStep(0);
+    
+    if (x.length > 0 && h.length > 0) {
+      const convolutionFunction = convolutionType === 'circular' ? convolveCircular : convolve;
+      const { y: output, steps: computedSteps, hFlipped: hf } = convolutionFunction(x, h, { zeroPad: val });
+      setY(output);
+      setSteps(computedSteps);
+      setHFlipped(hf || []);
+      setCurrentStep(0);
+    }
   };
 
   return (
@@ -119,15 +98,21 @@ function App() {
                   speed={animationSpeed}
                   onStepChange={setCurrentStep}
                 />
-                <GraphPanel 
-                  x={x}
-                  h={h}
-                  y={y}
-                  currentStep={currentStep}
-                  convolutionType={convolutionType}
-                />
+                <div className="graph-with-controls">
+                  <SpeedControl 
+                    speed={animationSpeed}
+                    onSpeedChange={setAnimationSpeed}
+                  />
+                  <GraphPanel 
+                    x={x}
+                    h={h}
+                    y={y}
+                    currentStep={currentStep}
+                    convolutionType={convolutionType}
+                  />
+                  <OutputPanel y={y} currentStep={currentStep} />
+                </div>
               </div>
-              <OutputPanel y={y} currentStep={currentStep} />
             </>
           ) : (
             <div className="no-data">
@@ -135,13 +120,6 @@ function App() {
             </div>
           )}
         </main>
-        
-        {hasStarted && (
-          <SpeedControl 
-            speed={animationSpeed}
-            onSpeedChange={setAnimationSpeed}
-          />
-        )}
       </div>
 
       <footer className="app-footer">

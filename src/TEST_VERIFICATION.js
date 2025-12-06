@@ -1,6 +1,3 @@
-// Quick Test Verification
-// Expected output for default example: x=[1,2,3], h=[5,6,7]
-
 import { convolve } from './ConvolutionEngine.js';
 
 const x = [1, 2, 3];
@@ -21,7 +18,6 @@ steps.forEach((step, idx) => {
   console.log('  Sum:', step.sum);
 });
 
-// Verify step structure
 console.log('\n--- Step Structure Verification ---');
 console.log('Number of steps:', steps.length);
 console.log('Expected steps:', x.length + h.length - 1);

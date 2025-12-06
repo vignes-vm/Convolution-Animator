@@ -1,14 +1,8 @@
 import React, { useState } from 'react';
 import './InputPanel.css';
 
-/**
- * InputPanel.jsx
- * 
- * Component for user input of sequences x[n] and h[n].
- * Accepts comma-separated numbers and validates them.
- */
 export default function InputPanel({ onStart, onConvolutionTypeChange }) {
-  // Start with empty inputs so user focuses on entering sequences
+
   const [xInput, setXInput] = useState('');
   const [hInput, setHInput] = useState('');
   const [error, setError] = useState('');
@@ -16,39 +10,27 @@ export default function InputPanel({ onStart, onConvolutionTypeChange }) {
   const [parsedH, setParsedH] = useState([]);
   const [convolutionType, setConvolutionType] = useState('linear');
   const [customLength, setCustomLength] = useState('5');
-  const [randomType, setRandomType] = useState('integers'); // 'integers' or 'decimals'
+  const [randomType, setRandomType] = useState('integers');
 
-  // Allow only digits, decimals, negatives, commas, spaces
   const validChars = /^[0-9+\-.,\s]*$/;
 
-  /**
-   * Generate random sequence based on type and length
-   */
   const generateRandomSequence = (length, type) => {
     const sequence = [];
     for (let i = 0; i < length; i++) {
       if (type === 'integers') {
-        // Generate integers between -5 and 5
         sequence.push(Math.floor(Math.random() * 11) - 5);
       } else {
-        // Generate decimals between -3 and 3 with 1 decimal place
         sequence.push(Math.round((Math.random() * 6 - 3) * 10) / 10);
       }
     }
     return sequence;
   };
 
-  /**
-   * Get current length from custom input
-   */
   const getCurrentLength = () => {
     const parsed = parseInt(customLength);
     return isNaN(parsed) || parsed < 1 || parsed > 20 ? 5 : parsed;
   };
 
-  /**
-   * Generate random sequence for x[n]
-   */
   const generateRandomX = () => {
     const length = getCurrentLength();
     const sequence = generateRandomSequence(length, randomType);
@@ -58,9 +40,6 @@ export default function InputPanel({ onStart, onConvolutionTypeChange }) {
     setError('');
   };
 
-  /**
-   * Generate random sequence for h[n]
-   */
   const generateRandomH = () => {
     const length = getCurrentLength();
     const sequence = generateRandomSequence(length, randomType);
@@ -70,22 +49,15 @@ export default function InputPanel({ onStart, onConvolutionTypeChange }) {
     setError('');
   };
 
-  /**
-   * Generate both random sequences
-   */
   const generateBothRandom = () => {
     generateRandomX();
     generateRandomH();
   };
 
-  /**
-   * Parses comma-separated input string into array of numbers
-   */
   const parseInput = (str) => {
     if (!str || str.trim() === '') return null;
     
     try {
-      // Quick character validation to prevent letters
       if (!validChars.test(str)) return null;
 
       const arr = str
@@ -103,9 +75,6 @@ export default function InputPanel({ onStart, onConvolutionTypeChange }) {
     }
   };
 
-  /**
-   * Handle Start Animation button click
-   */
   const handleStart = () => {
     setError('');
     
@@ -133,7 +102,6 @@ export default function InputPanel({ onStart, onConvolutionTypeChange }) {
     }
   };
 
-  // Live preview of parsed arrays whenever input changes
   const handleXChange = (v) => {
     setXInput(v);
     const p = parseInput(v);
@@ -151,7 +119,6 @@ export default function InputPanel({ onStart, onConvolutionTypeChange }) {
     setHInput(presetH.join(','));
     setParsedX(presetX);
     setParsedH(presetH);
-    // apply preset but do not auto-start; user can review and click Start
   };
 
   return (

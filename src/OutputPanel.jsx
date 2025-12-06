@@ -1,17 +1,11 @@
 import React from 'react';
 import './OutputPanel.css';
 
-/**
- * OutputPanel.jsx
- * 
- * Displays the output array y[n] from the convolution computation.
- * Highlights the value corresponding to the current animation step.
- */
 export default function OutputPanel({ y, currentStep }) {
   if (!y || y.length === 0) {
     return <div className="output-panel">No output to display</div>;
   }
-  // Determine maximum for bar scaling
+
   const maxVal = Math.max(...y.map(v => Math.abs(v)), 1);
 
   return (

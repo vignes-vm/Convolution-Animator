@@ -1,12 +1,6 @@
 import React from 'react';
 import './SpeedControl.css';
 
-/**
- * SpeedControl.jsx
- * 
- * Component for controlling animation speed with a vertical slider.
- * Positioned on the right side of the screen.
- */
 export default function SpeedControl({ speed, onSpeedChange }) {
   const handleSpeedChange = (e) => {
     const newSpeed = parseInt(e.target.value);
@@ -29,11 +23,7 @@ export default function SpeedControl({ speed, onSpeedChange }) {
       </div>
       
       <div className="speed-slider-container">
-        <div className="speed-scale">
-          <span className="speed-mark">Slow</span>
-          <span className="speed-mark">Normal</span>
-          <span className="speed-mark">Fast</span>
-        </div>
+        <span className="speed-mark">Fast</span>
         
         <input
           type="range"
@@ -43,19 +33,13 @@ export default function SpeedControl({ speed, onSpeedChange }) {
           value={speed}
           onChange={handleSpeedChange}
           className="speed-slider"
-          orient="vertical"
         />
         
-        <div className="speed-values">
-          <span className="speed-value">200ms</span>
-          <span className="speed-value">2000ms</span>
-          <span className="speed-value">4000ms</span>
-        </div>
+        <span className="speed-mark">Slow</span>
       </div>
       
       <div className="speed-info">
-        <p>Current: {speed}ms</p>
-        <p>Lower values = faster animation</p>
+        <span>Current: {speed}ms</span>
       </div>
     </div>
   );

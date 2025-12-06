@@ -6,6 +6,12 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange, sp
   const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
+    setCurrentStep(0);
+    setIsPlaying(true);
+    if (onStepChange) onStepChange(0);
+  }, [steps, onStepChange]);
+
+  useEffect(() => {
     if (!isPlaying || steps.length === 0) return;
 
     const interval = setInterval(() => {
@@ -23,7 +29,8 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange, sp
     return <div className="animation-panel">No steps to animate</div>;
   }
 
-  const step = steps[currentStep];
+  const safeCurrentStep = Math.min(currentStep, steps.length - 1);
+  const step = steps[safeCurrentStep];
   const n = step.n;
 
   const xMap = new Map();
@@ -47,7 +54,6 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange, sp
 
   const { xIndices, hIndices } = getOverlapIndices();
 
-  // Navigation handlers
   const handlePrevious = () => {
     const newStep = Math.max(0, currentStep - 1);
     setCurrentStep(newStep);
@@ -79,7 +85,7 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange, sp
 
       {/* Step counter */}
       <div className="step-counter">
-        Step {currentStep + 1} of {steps.length}: Computing y[{n}]
+        Step {safeCurrentStep + 1} of {steps.length}: Computing y[{n}]
       </div>
 
       {/* Input sequences visualization */}
@@ -105,23 +111,30 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange, sp
           </div>
         </div>
 
-        {/* h[n] sequence - display flipped h (hFlipped provided by convolve) */}
+        {/* h[n] sequence - display positioned h that aligns with x for current step */}
         <div className="sequence-row">
-          <label className="sequence-label">h (flipped):</label>
+          <label className="sequence-label">h[::-n]:</label>
           <div className="sequence">
-            {(hFlipped || h).map((val, idx) => (
-              <div
-                key={`h-${idx}`}
-                className={`element ${hIndices.has(idx) ? 'overlap' : ''} ${hMap.has(idx) ? 'pair' : ''}`}
-                title={`hFlipped[${idx}] = ${val}`}
-              >
-                <span className="index">[{idx}]</span>
-                <span className="value">{val}</span>
-                {hMap.has(idx) && (
-                  <div className="product-bubble bottom">{hMap.get(idx).product}</div>
-                )}
-              </div>
-            ))}
+            {(step.hPositioned || hFlipped || h).map((val, idx) => {
+              // For positioned h, only show elements that have values (not null)
+              const hasValue = step.hPositioned ? val !== null : true;
+              const displayVal = step.hPositioned ? (val !== null ? val : '') : val;
+              const isActive = hasValue && hIndices.has(idx);
+              
+              return (
+                <div
+                  key={`h-${idx}`}
+                  className={`element ${hasValue ? '' : 'empty'} ${isActive ? 'overlap' : ''} ${hMap.has(idx) ? 'pair' : ''}`}
+                  title={hasValue ? `h[${idx}] = ${displayVal}` : 'empty'}
+                >
+                  <span className="index">[{idx}]</span>
+                  <span className="value">{displayVal}</span>
+                  {hMap.has(idx) && hasValue && (
+                    <div className="product-bubble bottom">{hMap.get(idx).product}</div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -182,10 +195,10 @@ export default function AnimationPanel({ x, h, steps, hFlipped, onStepChange, sp
           type="range"
           min={0}
           max={steps.length - 1}
-          value={currentStep}
+          value={safeCurrentStep}
           onChange={handleSliderChange}
         />
-        <div className="slider-label">Step {currentStep + 1} / {steps.length}</div>
+        <div className="slider-label">Step {safeCurrentStep + 1} / {steps.length}</div>
       </div>
     </div>
   );
